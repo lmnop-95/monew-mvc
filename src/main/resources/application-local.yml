@@ -1,0 +1,31 @@
+spring:
+  config:
+    activate:
+      on-profile: local
+
+  cloud:
+    aws:
+      region:
+        static: ${AWS_S3_REGION}
+      credentials:
+        access-key: ${AWS_S3_ACCESS_KEY}
+        secret-key: ${AWS_S3_SECRET_KEY}
+
+  app:
+    aws:
+      s3:
+        bucket-name: monew-prod-bucket
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:${DB_LOCAL_PORT:5432}/${DB_LOCAL_DB_NAME:monew}
+    username: ${DB_LOCAL_USER:postgres}
+    password: ${DB_LOCAL_PASSWORD:1234}
+
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/monewDB
+
+  jpa:
+    hibernate:
+      ddl-auto: update
