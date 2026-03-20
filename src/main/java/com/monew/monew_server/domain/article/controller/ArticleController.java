@@ -122,11 +122,21 @@ public class ArticleController {
 	}
 
 	@GetMapping("/restore")
-	public ResponseEntity<List<ArticleRestoreResult>> restoreArticles(
+	public ResponseEntity<ArticleRestoreResult> restoreArticles(
 		@RequestParam("from") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime from,
 		@RequestParam("to") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime to) {
 
-		List<ArticleRestoreResult> response = articleService.restoreArticles(from, to);
-		return ResponseEntity.ok(response);
+		List<ArticleRestoreResult> results = articleService.restoreArticles(from, to);
+
+		List<UUID> allRestoredIds = results.stream()
+			.flatMap(r -> r.restoredArticleIds().stream())
+			.toList();
+
+		ArticleRestoreResult merged = new ArticleRestoreResult(
+			LocalDateTime.now(),
+			allRestoredIds,
+			allRestoredIds.size()
+		);
+		return ResponseEntity.ok(merged);
 	}
 }
