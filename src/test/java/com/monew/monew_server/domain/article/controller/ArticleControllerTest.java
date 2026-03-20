@@ -24,6 +24,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.monew.monew_server.domain.article.dto.ArticleRequest;
 import com.monew.monew_server.domain.article.dto.ArticleResponse;
 import com.monew.monew_server.domain.article.dto.ArticleRestoreResult;
+import com.monew.monew_server.domain.article.dto.ArticleViewResponse;
 import com.monew.monew_server.domain.article.dto.CursorPageResponseArticleDto;
 import com.monew.monew_server.domain.article.entity.ArticleSource;
 import com.monew.monew_server.domain.article.service.ArticleService;
@@ -135,7 +136,8 @@ class ArticleControllerTest {
 	@Test
 	@DisplayName("기사 조회수 추가 API 호출 성공")
 	void shouldAddArticleView() throws Exception {
-		doNothing().when(articleService).addArticleView(any(UUID.class), any(UUID.class));
+		ArticleViewResponse mockResponse = ArticleViewResponse.builder().build();
+		when(articleService.addArticleView(any(UUID.class), any(UUID.class))).thenReturn(mockResponse);
 
 		mockMvc.perform(post("/api/articles/" + ARTICLE_ID_1 + "/article-views")
 				.header("Monew-Request-User-ID", ARTICLE_ID_2.toString()))
@@ -188,9 +190,9 @@ class ArticleControllerTest {
 				.param("from", "2025-01-01T00:00:00")
 				.param("to", "2025-01-02T00:00:00"))
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$[0].restoredArticleCount").value(1))  // 필드명 수정
-			.andExpect(jsonPath("$[0].restoredArticleIds[0]").value(ARTICLE_ID_1.toString()))  // 추가 검증
-			.andExpect(jsonPath("$[0].restoreDate").exists());  // 날짜 존재 확인
+			.andExpect(jsonPath("$.restoredArticleCount").value(1))
+			.andExpect(jsonPath("$.restoredArticleIds[0]").value(ARTICLE_ID_1.toString()))
+			.andExpect(jsonPath("$.restoreDate").exists());
 	}
 
 	@Test
@@ -308,7 +310,8 @@ class ArticleControllerTest {
 	@Test
 	@DisplayName("조회수 추가 시 User-ID 헤더 없이도 정상 처리")
 	void shouldAddArticleViewWithoutUserIdHeader() throws Exception {
-		doNothing().when(articleService).addArticleView(eq(ARTICLE_ID_1), isNull());
+		ArticleViewResponse mockResponse = ArticleViewResponse.builder().build();
+		when(articleService.addArticleView(eq(ARTICLE_ID_1), isNull())).thenReturn(mockResponse);
 
 		mockMvc.perform(post("/api/articles/" + ARTICLE_ID_1 + "/article-views"))
 			.andExpect(status().isOk());
@@ -319,7 +322,8 @@ class ArticleControllerTest {
 	@Test
 	@DisplayName("조회수 추가 시 잘못된 UUID 헤더 처리")
 	void shouldAddArticleViewWithInvalidUserIdHeader() throws Exception {
-		doNothing().when(articleService).addArticleView(eq(ARTICLE_ID_1), isNull());
+		ArticleViewResponse mockResponse = ArticleViewResponse.builder().build();
+		when(articleService.addArticleView(eq(ARTICLE_ID_1), isNull())).thenReturn(mockResponse);
 
 		mockMvc.perform(post("/api/articles/" + ARTICLE_ID_1 + "/article-views")
 				.header("Monew-Request-User-ID", "not-a-uuid"))
@@ -351,7 +355,7 @@ class ArticleControllerTest {
 	}
 
 	@Test
-	@DisplayName("복수 개의 복구 결과 반환")
+	@DisplayName("복수 개의 복구 결과가 하나로 병합되어 반환")
 	void shouldRestoreMultipleArticles() throws Exception {
 		List<ArticleRestoreResult> results = List.of(
 			new ArticleRestoreResult(LocalDateTime.now(), List.of(ARTICLE_ID_1), 1),
@@ -365,13 +369,12 @@ class ArticleControllerTest {
 				.param("from", "2025-01-01T00:00:00")
 				.param("to", "2025-01-02T00:00:00"))
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.length()").value(2))
-			.andExpect(jsonPath("$[0].restoredArticleCount").value(1))
-			.andExpect(jsonPath("$[1].restoredArticleCount").value(1));
+			.andExpect(jsonPath("$.restoredArticleCount").value(2))
+			.andExpect(jsonPath("$.restoredArticleIds.length()").value(2));
 	}
 
 	@Test
-	@DisplayName("복구할 기사가 없는 경우 빈 배열 반환")
+	@DisplayName("복구할 기사가 없는 경우 빈 결과 반환")
 	void shouldReturnEmptyListWhenNoArticlesToRestore() throws Exception {
 		when(articleService.restoreArticles(any(LocalDateTime.class), any(LocalDateTime.class)))
 			.thenReturn(List.of());
@@ -380,6 +383,7 @@ class ArticleControllerTest {
 				.param("from", "2025-01-01T00:00:00")
 				.param("to", "2025-01-02T00:00:00"))
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.length()").value(0));
+			.andExpect(jsonPath("$.restoredArticleCount").value(0))
+			.andExpect(jsonPath("$.restoredArticleIds.length()").value(0));
 	}
 }

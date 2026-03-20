@@ -24,6 +24,7 @@ import com.monew.monew_server.domain.interest.entity.Interest;
 import com.monew.monew_server.domain.interest.entity.InterestKeyword;
 import com.monew.monew_server.domain.interest.repository.InterestKeywordRepository;
 import com.monew.monew_server.domain.interest.repository.InterestRepository;
+import com.monew.monew_server.domain.notification.service.NotificationService;
 import com.monew.monew_server.domain.user.entity.User;
 import com.monew.monew_server.exception.ArticleException;
 import jakarta.persistence.EntityManager;
@@ -55,6 +56,7 @@ public class ArticleService {
 	private final InterestRepository interestRepository;
 	private final ArticleInterestRepository articleInterestRepository;
 	private final InterestKeywordRepository interestKeywordRepository;
+	private final NotificationService notificationService;
 
 	public ArticleService(
 		ArticleRepository articleRepository,
@@ -63,7 +65,8 @@ public class ArticleService {
 		ArticleViewRepository articleViewRepository,
 		CommentRepository commentRepository, S3BinaryStorage s3BinaryStorage,
 		InterestRepository interestRepository, ArticleInterestRepository articleInterestRepository,
-		InterestKeywordRepository interestKeywordRepository
+		InterestKeywordRepository interestKeywordRepository,
+		NotificationService notificationService
 	) {
 		this.articleRepository = articleRepository;
 		this.articleRepositoryCustom = articleRepositoryCustom;
@@ -74,6 +77,7 @@ public class ArticleService {
 		this.interestRepository = interestRepository;
 		this.articleInterestRepository = articleInterestRepository;
 		this.interestKeywordRepository = interestKeywordRepository;
+		this.notificationService = notificationService;
 	}
 
 	private static final int DEFAULT_PAGE_SIZE = 10;
@@ -342,6 +346,15 @@ public class ArticleService {
 
 						if (!articleInterestsToSave.isEmpty()) {
 							articleInterestRepository.saveAll(articleInterestsToSave);
+
+							// 관심사별 연결된 기사 수를 집계하여 구독자에게 알림 발송
+							Map<Interest, Long> articleCountByInterest = articleInterestsToSave.stream()
+								.collect(Collectors.groupingBy(ArticleInterest::getInterest, Collectors.counting()));
+
+							for (Map.Entry<Interest, Long> entry : articleCountByInterest.entrySet()) {
+								notificationService.createInterestArticleNotification(
+									entry.getKey(), entry.getValue().intValue());
+							}
 						}
 					}
 

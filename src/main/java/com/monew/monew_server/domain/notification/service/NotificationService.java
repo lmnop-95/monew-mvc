@@ -1,6 +1,9 @@
 package com.monew.monew_server.domain.notification.service;
 
 import com.monew.monew_server.domain.comment.entity.Comment;
+import com.monew.monew_server.domain.interest.entity.Interest;
+import com.monew.monew_server.domain.interest.entity.Subscription;
+import com.monew.monew_server.domain.interest.repository.SubscriptionRepository;
 import com.monew.monew_server.domain.notification.dto.CursorPageResponse;
 import com.monew.monew_server.domain.notification.dto.NotificationDto;
 import com.monew.monew_server.domain.notification.entity.Notification;
@@ -26,6 +29,7 @@ public class NotificationService {
 	private final NotificationRepository notificationRepository;
 	private final NotificationMapper notificationMapper;
 	private final UserRepository userRepository;
+	private final SubscriptionRepository subscriptionRepository;
 
 	@Transactional
 	public void createCommentLikeNotification(Comment comment, UUID likedByUserId) {
@@ -50,6 +54,28 @@ public class NotificationService {
 		notificationRepository.save(notification);
 
 		log.info("알림(댓글 좋아요) 생성 완료: commentId={}, likedBy={}", comment.getId(), likedByUserId);
+	}
+
+	@Transactional
+	public void createInterestArticleNotification(Interest interest, int articleCount) {
+		log.info("알림(관심사 기사) 생성 시작: interestId={}, articleCount={}", interest.getId(), articleCount);
+
+		List<Subscription> subscriptions = subscriptionRepository.findAllByInterestId(interest.getId());
+
+		for (Subscription subscription : subscriptions) {
+			Notification notification = Notification.builder()
+				.user(subscription.getUser())
+				.content(String.format("%s와 관련된 기사가 %d건 등록되었습니다.", interest.getName(), articleCount))
+				.resourceType(NotificationResourceType.interest)
+				.resourceId(interest.getId())
+				.confirmed(false)
+				.build();
+
+			notificationRepository.save(notification);
+		}
+
+		log.info("알림(관심사 기사) 생성 완료: interestId={}, 구독자 {}명에게 알림 발송",
+			interest.getId(), subscriptions.size());
 	}
 
 	@Transactional(readOnly = true)

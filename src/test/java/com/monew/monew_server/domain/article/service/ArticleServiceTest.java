@@ -74,6 +74,8 @@ class ArticleServiceTest {
 	private EntityManager entityManager;
 	@Mock
 	private S3BinaryStorage s3BinaryStorage;
+	@Mock
+	private com.monew.monew_server.domain.notification.service.NotificationService notificationService;
 
 	private ArticleService articleService;
 
@@ -91,7 +93,8 @@ class ArticleServiceTest {
 			s3BinaryStorage,
 			interestRepository,
 			articleInterestRepository,
-			interestKeywordRepository
+			interestKeywordRepository,
+			notificationService
 		);
 		try {
 			java.lang.reflect.Field entityManagerField = ArticleService.class.getDeclaredField("entityManager");
@@ -564,9 +567,11 @@ class ArticleServiceTest {
 	@Test
 	@DisplayName("Service - 조회수 추가 - userId null이면 저장 안함")
 	void shouldNotSaveViewWhenUserIdIsNullInAddArticleView() {
-		Article article = Article.builder().id(ARTICLE_ID).build();
+		Article article = Article.builder().id(ARTICLE_ID).source(ArticleSource.NAVER).build();
 
 		when(articleRepositoryCustom.findArticleById(ARTICLE_ID)).thenReturn(Optional.of(article));
+		when(articleViewRepository.countByArticleId(ARTICLE_ID)).thenReturn(0L);
+		when(commentRepository.countByArticleId(ARTICLE_ID)).thenReturn(0L);
 
 		articleService.addArticleView(ARTICLE_ID, null);
 
@@ -576,10 +581,14 @@ class ArticleServiceTest {
 	@Test
 	@DisplayName("Service - 조회수 추가 - 이미 조회한 기사면 저장 안함")
 	void shouldNotSaveViewWhenAlreadyViewedInAddArticleView() {
-		Article article = Article.builder().id(ARTICLE_ID).build();
+		Article article = Article.builder().id(ARTICLE_ID).source(ArticleSource.NAVER).build();
+		User user = User.builder().id(DUMMY_USER_ID).build();
 
 		when(articleRepositoryCustom.findArticleById(ARTICLE_ID)).thenReturn(Optional.of(article));
 		when(articleViewRepository.existsByArticleIdAndUserId(ARTICLE_ID, DUMMY_USER_ID)).thenReturn(true);
+		when(entityManager.getReference(User.class, DUMMY_USER_ID)).thenReturn(user);
+		when(articleViewRepository.countByArticleId(ARTICLE_ID)).thenReturn(1L);
+		when(commentRepository.countByArticleId(ARTICLE_ID)).thenReturn(0L);
 
 		articleService.addArticleView(ARTICLE_ID, DUMMY_USER_ID);
 
@@ -589,12 +598,16 @@ class ArticleServiceTest {
 	@Test
 	@DisplayName("Service - 조회수 추가 - 새로운 조회면 저장")
 	void shouldSaveViewWhenNotViewedYet() {
-		Article article = Article.builder().id(ARTICLE_ID).build();
+		Article article = Article.builder().id(ARTICLE_ID).source(ArticleSource.NAVER).build();
 		User user = User.builder().id(DUMMY_USER_ID).build();
+		ArticleView savedView = ArticleView.of(article, user);
 
 		when(articleRepositoryCustom.findArticleById(ARTICLE_ID)).thenReturn(Optional.of(article));
 		when(articleViewRepository.existsByArticleIdAndUserId(ARTICLE_ID, DUMMY_USER_ID)).thenReturn(false);
 		when(entityManager.getReference(User.class, DUMMY_USER_ID)).thenReturn(user);
+		when(articleViewRepository.save(any(ArticleView.class))).thenReturn(savedView);
+		when(articleViewRepository.countByArticleId(ARTICLE_ID)).thenReturn(1L);
+		when(commentRepository.countByArticleId(ARTICLE_ID)).thenReturn(0L);
 
 		articleService.addArticleView(ARTICLE_ID, DUMMY_USER_ID);
 
@@ -1273,12 +1286,16 @@ class ArticleServiceTest {
 	@Test
 	@DisplayName("addArticleView - userId가 null이 아니지만 빈 문자열도 아닐 때")
 	void shouldAddViewWhenUserIdIsValid() {
-		Article article = Article.builder().id(ARTICLE_ID).build();
+		Article article = Article.builder().id(ARTICLE_ID).source(ArticleSource.NAVER).build();
 		User user = User.builder().id(DUMMY_USER_ID).build();
+		ArticleView savedView = ArticleView.of(article, user);
 
 		when(articleRepositoryCustom.findArticleById(ARTICLE_ID)).thenReturn(Optional.of(article));
 		when(articleViewRepository.existsByArticleIdAndUserId(ARTICLE_ID, DUMMY_USER_ID)).thenReturn(false);
 		when(entityManager.getReference(User.class, DUMMY_USER_ID)).thenReturn(user);
+		when(articleViewRepository.save(any(ArticleView.class))).thenReturn(savedView);
+		when(articleViewRepository.countByArticleId(ARTICLE_ID)).thenReturn(1L);
+		when(commentRepository.countByArticleId(ARTICLE_ID)).thenReturn(0L);
 
 		articleService.addArticleView(ARTICLE_ID, DUMMY_USER_ID);
 
@@ -1731,11 +1748,15 @@ class ArticleServiceTest {
 	@Test
 	@DisplayName("Service - addArticleView 콘솔 출력 확인용")
 	void shouldPrintUserIdInAddArticleView() {
-		Article article = Article.builder().id(ARTICLE_ID).build();
+		Article article = Article.builder().id(ARTICLE_ID).source(ArticleSource.NAVER).build();
+		User user = User.builder().id(DUMMY_USER_ID).build();
 
 		when(articleRepositoryCustom.findArticleById(ARTICLE_ID)).thenReturn(Optional.of(article));
 		when(articleViewRepository.existsByArticleIdAndUserId(ARTICLE_ID, DUMMY_USER_ID))
 			.thenReturn(true);
+		when(entityManager.getReference(User.class, DUMMY_USER_ID)).thenReturn(user);
+		when(articleViewRepository.countByArticleId(ARTICLE_ID)).thenReturn(1L);
+		when(commentRepository.countByArticleId(ARTICLE_ID)).thenReturn(0L);
 
 		articleService.addArticleView(ARTICLE_ID, DUMMY_USER_ID);
 
