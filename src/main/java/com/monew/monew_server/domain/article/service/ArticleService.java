@@ -3,6 +3,7 @@ package com.monew.monew_server.domain.article.service;
 import com.monew.monew_server.domain.article.dto.ArticleRequest;
 import com.monew.monew_server.domain.article.dto.ArticleResponse;
 import com.monew.monew_server.domain.article.dto.ArticleRestoreResult;
+import com.monew.monew_server.domain.article.dto.ArticleViewResponse;
 import com.monew.monew_server.domain.article.dto.ArticleSaveDto;
 import com.monew.monew_server.domain.article.dto.CursorPageResponseArticleDto;
 import com.monew.monew_server.domain.article.entity.Article;
@@ -202,16 +203,34 @@ public class ArticleService {
 	}
 
 	@Transactional
-	public void addArticleView(UUID articleId, UUID userId) {
-		System.out.println("Received User ID in Service: " + userId);
-
+	public ArticleViewResponse addArticleView(UUID articleId, UUID userId) {
 		Article article = articleRepositoryCustom.findArticleById(articleId)
 			.orElseThrow(ArticleException::new);
 
+		ArticleView articleView;
 		if (userId != null && !articleViewRepository.existsByArticleIdAndUserId(articleId, userId)) {
 			User userRef = entityManager.getReference(User.class, userId);
-			articleViewRepository.save(ArticleView.of(article, userRef));
+			articleView = articleViewRepository.save(ArticleView.of(article, userRef));
+		} else {
+			articleView = ArticleView.of(article, userId != null ? entityManager.getReference(User.class, userId) : null);
 		}
+
+		long viewCount = articleViewRepository.countByArticleId(articleId);
+		long commentCount = commentRepository.countByArticleId(articleId);
+
+		return ArticleViewResponse.builder()
+			.id(articleView.getId())
+			.viewedBy(userId)
+			.createdAt(articleView.getCreatedAt())
+			.articleId(article.getId())
+			.source(article.getSource().name())
+			.sourceUrl(article.getSourceUrl())
+			.articleTitle(article.getTitle())
+			.articlePublishedDate(article.getPublishDate())
+			.articleSummary(article.getSummary())
+			.articleCommentCount(commentCount)
+			.articleViewCount(viewCount)
+			.build();
 	}
 
 	@Transactional

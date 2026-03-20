@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.monew.monew_server.domain.article.dto.ArticleRequest;
 import com.monew.monew_server.domain.article.dto.ArticleResponse;
 import com.monew.monew_server.domain.article.dto.ArticleRestoreResult;
+import com.monew.monew_server.domain.article.dto.ArticleViewResponse;
 import com.monew.monew_server.domain.article.dto.CursorPageResponseArticleDto;
 import com.monew.monew_server.domain.article.service.ArticleService;
 
@@ -98,14 +99,14 @@ public class ArticleController {
 	}
 
 	@PostMapping("/{articleId}/article-views")
-	public ResponseEntity<Void> addArticleView(@PathVariable UUID articleId,
+	public ResponseEntity<ArticleViewResponse> addArticleView(@PathVariable UUID articleId,
 		@RequestHeader(value = USER_ID_HEADER, required = false) String userIdHeader) {
 
 		UUID userId = getUserIdFromHeader(userIdHeader);
 		log.info("POST /api/articles/{}/article-views - (사용자 ID: {})", articleId, userId);
 
-		articleService.addArticleView(articleId, userId);
-		return ResponseEntity.ok().build();
+		ArticleViewResponse response = articleService.addArticleView(articleId, userId);
+		return ResponseEntity.ok(response);
 	}
 
 	@DeleteMapping("/{articleId}")
