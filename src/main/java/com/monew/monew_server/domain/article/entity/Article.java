@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.monew.monew_server.domain.article.dto.ArticleSaveDto;
 import com.monew.monew_server.domain.common.BaseDeletableEntity;
 import com.monew.monew_server.domain.interest.entity.ArticleInterest;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -33,12 +34,16 @@ public class Article extends BaseDeletableEntity {
 	@Enumerated(EnumType.STRING)
 	private ArticleSource source;
 
+	@Column(columnDefinition = "text", nullable = false)
 	private String sourceUrl;
 
+	@Column(columnDefinition = "text", nullable = false)
 	private String title;
 
+	@Column(columnDefinition = "text")
 	private String summary;
 
+	@Column(columnDefinition = "timestamp with time zone", nullable = false)
 	private Instant publishDate;
 
 	@OneToMany(mappedBy = "article")

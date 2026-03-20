@@ -14,7 +14,7 @@ spring:
   app:
     aws:
       s3:
-        bucket-name: monew-prod-bucket
+        bucket-name: ${AWS_S3_BUCKET:monew-prod-bucket-155370302844-ap-northeast-2-an}
 
   boot:
     admin:
@@ -29,7 +29,7 @@ spring:
 
   data:
     mongodb:
-      uri: mongodb://mongo:asdf1234!@monew-cluster-182498323365.ap-northeast-2.docdb-elastic.amazonaws.com:27017/monew?tls=true&authMechanism=SCRAM-SHA-1&retryWrites=false
+      uri: ${MONGO_URI}
 
   jpa:
     hibernate:

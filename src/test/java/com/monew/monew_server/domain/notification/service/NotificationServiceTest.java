@@ -119,7 +119,7 @@ class NotificationServiceTest {
 			notification.getUser().getId().equals(userId) &&
 				notification.getResourceType() == NotificationResourceType.comment &&
 				notification.getResourceId().equals(comment.getId()) &&
-				!notification.isConfirmed() &&
+				!notification.getConfirmed() &&
 				notification.getContent().contains(likedByUser.getNickname())
 		));
 	}
@@ -175,7 +175,7 @@ class NotificationServiceTest {
 		notificationService.confirm(notificationId, userId);
 
 		// Then
-		assertThat(notification.isConfirmed()).isTrue();
+		assertThat(notification.getConfirmed()).isTrue();
 		verify(notificationRepository).findByIdAndUserId(notificationId, userId);
 	}
 

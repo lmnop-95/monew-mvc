@@ -211,5 +211,5 @@ out/
 .vscode/
 
 .env
-
+*.local.md
 .logs

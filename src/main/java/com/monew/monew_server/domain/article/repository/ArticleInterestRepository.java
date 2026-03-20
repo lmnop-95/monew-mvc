@@ -10,4 +10,5 @@ import com.monew.monew_server.domain.interest.entity.ArticleInterest;
 @Repository
 public interface ArticleInterestRepository extends JpaRepository<ArticleInterest, UUID> {
 
+	void deleteAllByInterestId(UUID interestId);
 }

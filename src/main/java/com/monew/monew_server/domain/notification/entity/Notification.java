@@ -3,6 +3,7 @@ package com.monew.monew_server.domain.notification.entity;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.monew.monew_server.domain.common.BaseUpdatableEntity;
 import com.monew.monew_server.domain.user.entity.User;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -17,6 +18,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import lombok.Builder;
 import lombok.experimental.SuperBuilder;
 
 @Entity
@@ -30,17 +32,22 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Notification extends BaseUpdatableEntity {
 
-	private boolean confirmed;
+	@Column(nullable = false)
+	@Builder.Default
+	private Boolean confirmed = false;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "user_id")
+	@JoinColumn(name = "user_id", nullable = false)
 	private User user;
 
+	@Column(columnDefinition = "text", nullable = false)
 	private String content;
 
 	@Enumerated(EnumType.STRING)
+	@Column(nullable = false, length = 50)
 	private NotificationResourceType resourceType;
 
+	@Column(nullable = false)
 	private UUID resourceId;
 
 	public void confirm() {

@@ -87,7 +87,7 @@ class NotificationRepositoryTest {
 		// Then
 		assertThat(result).isNotNull();
 		assertThat(result).hasSize(2);
-		assertThat(result).allMatch(n -> !n.isConfirmed());
+		assertThat(result).allMatch(n -> !n.getConfirmed());
 	}
 
 	@Test

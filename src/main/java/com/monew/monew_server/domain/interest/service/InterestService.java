@@ -1,5 +1,6 @@
 package com.monew.monew_server.domain.interest.service;
 
+import com.monew.monew_server.domain.article.repository.ArticleInterestRepository;
 import com.monew.monew_server.domain.interest.dto.CursorPageResponseInterestDto;
 import com.monew.monew_server.domain.interest.dto.InterestDto;
 import com.monew.monew_server.domain.interest.dto.InterestQuery;
@@ -37,6 +38,7 @@ public class InterestService {
     private final InterestRepository interestRepository;
     private final InterestKeywordRepository interestKeywordRepository;
     private final SubscriptionRepository subscriptionRepository;
+    private final ArticleInterestRepository articleInterestRepository;
     private final UserRepository userRepository;
 
     private final InterestMapper interestMapper;
@@ -115,6 +117,9 @@ public class InterestService {
     @Transactional
     public void delete(UUID interestId) {
         interestRepository.getOrThrow(interestId);
+        articleInterestRepository.deleteAllByInterestId(interestId);
+        interestKeywordRepository.deleteAllByInterestId(interestId);
+        subscriptionRepository.deleteAllByInterestId(interestId);
         interestRepository.deleteById(interestId);
     }
 

@@ -28,11 +28,11 @@ import lombok.experimental.SuperBuilder;
 public class ArticleView extends BaseEntity {
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "article_id")
+	@JoinColumn(name = "article_id", nullable = false)
 	private Article article;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "user_id")
+	@JoinColumn(name = "user_id", nullable = false)
 	private User user;
 
 	public static ArticleView of(Article article, User user) {

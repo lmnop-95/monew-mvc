@@ -17,4 +17,6 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, UUID
     void deleteByUserIdAndInterestId(UUID userId, UUID interestId);
 
     void deleteAllByUserId(UUID userId);
+
+    void deleteAllByInterestId(UUID interestId);
 }
