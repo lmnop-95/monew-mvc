@@ -73,7 +73,7 @@ public class CommentController {
     @DeleteMapping("/{commentId}")
     public ResponseEntity<Void> deleteComment(
             @PathVariable UUID commentId,
-            @RequestHeader("Monew-Request-User-Id") UUID userId
+            @RequestHeader("Monew-Request-User-ID") UUID userId
     ) {
         log.info("DELETE /api/comments/{} - 논리 삭제 요청, userId={}", commentId, userId);
 

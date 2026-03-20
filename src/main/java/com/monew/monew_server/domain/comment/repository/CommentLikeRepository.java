@@ -28,4 +28,8 @@ public interface CommentLikeRepository extends JpaRepository<CommentLike, UUID> 
            "WHERE cl.comment.id IN :commentIds " +
            "GROUP BY cl.comment.id")
     List<Object[]> countByCommentIds(@Param("commentIds") List<UUID> commentIds);
+
+    void deleteAllByUserId(UUID userId);
+
+    void deleteAllByCommentId(UUID commentId);
 }

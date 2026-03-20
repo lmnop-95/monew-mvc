@@ -34,4 +34,6 @@ public interface ArticleViewRepository extends JpaRepository<ArticleView, UUID> 
 		""")
 	Set<UUID> findArticleIdsViewedByUser(@Param("articleIds") List<UUID> articleIds,
 		@Param("userId") UUID userId);
+
+	void deleteAllByUserId(UUID userId);
 }

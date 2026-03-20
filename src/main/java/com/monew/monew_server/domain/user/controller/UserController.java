@@ -45,12 +45,14 @@ public class UserController {
 	}
 
 	@DeleteMapping("/{userId}")
-	public ResponseEntity<String> deleteUser(@PathVariable UUID userId) {
+	public ResponseEntity<Void> deleteUser(@PathVariable UUID userId) {
 		userService.deleteUser(userId);
-		return ResponseEntity.ok("회원이 논리적으로 삭제되었습니다.");
+		return ResponseEntity.noContent().build();
 	}
 
-
-
-
+	@DeleteMapping("/{userId}/hard")
+	public ResponseEntity<Void> hardDeleteUser(@PathVariable UUID userId) {
+		userService.hardDeleteUser(userId);
+		return ResponseEntity.noContent().build();
+	}
 }

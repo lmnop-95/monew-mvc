@@ -41,14 +41,22 @@ class UserControllerTest {
 				.password("test1234!")
 				.build();
 
-			Mockito.doNothing().when(userService).register(any(UserRegisterRequest.class));
+			UserDto dto = UserDto.builder()
+				.id(UUID.randomUUID())
+				.email("test@email.com")
+				.nickname("tester")
+				.createdAt(Instant.now())
+				.build();
+
+			Mockito.when(userService.register(any(UserRegisterRequest.class))).thenReturn(dto);
 
 			// when
-			ResponseEntity<String> response = userController.registerUser(request);
+			ResponseEntity<UserDto> response = userController.registerUser(request);
 
 			// then
-			assertThat(response.getStatusCode().value()).isEqualTo(200);
-			assertThat(response.getBody()).isEqualTo("회원가입이 완료되었습니다.");
+			assertThat(response.getStatusCode().value()).isEqualTo(201);
+			assertThat(response.getBody()).isNotNull();
+			assertThat(response.getBody().getEmail()).isEqualTo("test@email.com");
 		}
 	}
 
@@ -120,9 +128,9 @@ class UserControllerTest {
 			UUID userId = UUID.randomUUID();
 			Mockito.doNothing().when(userService).deleteUser(userId);
 
-			ResponseEntity<String> response = userController.deleteUser(userId);
+			ResponseEntity<Void> response = userController.deleteUser(userId);
 
-			assertThat(response.getStatusCode().value()).isEqualTo(200);
+			assertThat(response.getStatusCode().value()).isEqualTo(204);
 		}
 
 		// @Test

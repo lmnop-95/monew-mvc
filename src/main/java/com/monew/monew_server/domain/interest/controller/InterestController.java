@@ -47,13 +47,13 @@ public class InterestController {
         return interestService.create(request);
     }
 
-    @DeleteMapping("{interestId}")
+    @DeleteMapping("/{interestId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable UUID interestId) {
         interestService.delete(interestId);
     }
 
-    @PatchMapping("{interestId}")
+    @PatchMapping("/{interestId}")
     @ResponseStatus(HttpStatus.OK)
     public InterestDto update(
         @PathVariable UUID interestId,
@@ -62,7 +62,7 @@ public class InterestController {
         return interestService.update(interestId, request);
     }
 
-    @PostMapping("{interestId}/subscriptions")
+    @PostMapping("/{interestId}/subscriptions")
     @ResponseStatus(HttpStatus.OK)
     public SubscriptionDto subscribe(
         @PathVariable UUID interestId,
@@ -71,7 +71,7 @@ public class InterestController {
         return interestService.subscribe(interestId, userId);
     }
 
-    @DeleteMapping("{interestId}/subscriptions")
+    @DeleteMapping("/{interestId}/subscriptions")
     @ResponseStatus(HttpStatus.OK)
     public void unsubscribe(
         @PathVariable UUID interestId,

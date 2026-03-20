@@ -62,11 +62,14 @@ class UserServiceTest {
 
 			given(userRepository.existsByEmail(request.getEmail())).willReturn(false);
 			given(userRepository.existsByNickname(request.getNickname())).willReturn(false);
+			given(userRepository.save(any(User.class))).willReturn(user);
 
 			// when
-			userService.register(request);
+			UserDto result = userService.register(request);
 
 			// then
+			assertThat(result.getEmail()).isEqualTo("test@email.com");
+			assertThat(result.getNickname()).isEqualTo("tester");
 			then(userRepository).should(times(1)).save(any(User.class));
 		}
 
