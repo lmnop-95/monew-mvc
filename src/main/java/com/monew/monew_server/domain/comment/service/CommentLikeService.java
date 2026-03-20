@@ -8,15 +8,12 @@ import com.monew.monew_server.domain.comment.repository.CommentRepository;
 import com.monew.monew_server.domain.notification.service.NotificationService;
 import com.monew.monew_server.domain.user.entity.User;
 import com.monew.monew_server.domain.user.repository.UserRepository;
-
-import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
@@ -26,7 +23,6 @@ public class CommentLikeService {
 
     private final CommentLikeRepository commentLikeRepository;
     private final CommentRepository commentRepository;
-    private final EntityManager entityManager;
     private final NotificationService notificationService;
 	private final UserRepository userRepository;
 
@@ -75,6 +71,7 @@ public class CommentLikeService {
                 .createdAt(savedLike.getCreatedAt())
                 .commentId(comment.getId())
                 .articleId(comment.getArticle().getId())
+                .articleTitle(comment.getArticle().getTitle())
                 .commentUserId(comment.getUser().getId())
                 .commentUserNickname(comment.getUser().getNickname())
                 .commentContent(comment.getContent())

@@ -20,6 +20,7 @@ public class CommentLikeDto {
 
     private UUID commentId;
     private UUID articleId;
+    private String articleTitle;
     private UUID commentUserId;
     private String commentUserNickname;
     private String commentContent;
